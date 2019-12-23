@@ -19,8 +19,14 @@ use Psr\Container\ContainerInterface;
  */
 class PsrServiceContainer implements ContainerInterface, ResolverInterface
 {
+    /**
+     * @var array[string] string|DefinitionInterface Instance definitions
+     */
     protected $definitions = [];
 
+    /**
+     * @var array Resolved instances
+     */
     protected $resolvedDefinitions = [];
 
     /**
@@ -48,6 +54,7 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      * Return all set definitions
      *
      * @return array
+     * @since 1.1.0
      */
     public function getDefinitions()
     {
@@ -82,16 +89,26 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
         return $this->resolve($id);
     }
 
-
+    /**
+     * Checks if resolved for PSR-11 compliance
+     *
+     * @param string $id
+     *
+     * @return bool
+     */
     public function has($id)
     {
-        if ($this->isResolved($id)) {
-            return true;
-        }
-
-        return false;
+        return $this->isResolved($id);
     }
 
+    /**
+     * Resolve requested definition
+     *
+     * @param $definitionName
+     *
+     * @return mixed
+     * @since 1.1.0
+     */
     public function resolve($definitionName)
     {
         if ($this->isResolved($definitionName)) {
@@ -109,11 +126,27 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
         return $this->resolvedDefinitions[$definitionName];
     }
 
+    /**
+     * Check if definition is already defined
+     *
+     * @param $className
+     *
+     * @return bool
+     * @since 1.1.0
+     */
     protected function isDefined($className)
     {
         return array_key_exists($className, $this->getDefinitions());
     }
 
+    /**
+     * Check if requested definition is already resolved
+     *
+     * @param $definition
+     *
+     * @return bool
+     * @since 1.1.0
+     */
     protected function isResolved($definition)
     {
         return array_key_exists($definition, $this->resolvedDefinitions);

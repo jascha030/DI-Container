@@ -9,20 +9,52 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
 
+/**
+ * Class ObjectDefinition
+ *
+ * @package Jascha030\DIC\Definition
+ * @author Jascha van Aalst
+ * @since 1.1.0
+ */
 class ObjectDefinition implements DefinitionInterface
 {
+    /**
+     * @var string $definitionName
+     */
     protected $definitionName;
 
+    /**
+     * ObjectDefinition constructor.
+     *
+     * @param $className
+     */
     public function __construct($className)
     {
         $this->definitionName = $className;
     }
 
+    /**
+     * Set definition
+     *
+     * @param $className
+     *
+     * @return ObjectDefinition
+     */
     public static function define($className)
     {
         return new ObjectDefinition($className);
     }
 
+    /**
+     * Resolve object definition
+     *
+     * @param ResolverInterface $resolver
+     *
+     * @return mixed
+     * @throws ClassNotFoundException
+     * @throws UnresolvableDependencyException
+     * @throws ReflectionException
+     */
     public function resolve(ResolverInterface $resolver)
     {
         if ( ! class_exists($this->definitionName)) {
@@ -42,6 +74,16 @@ class ObjectDefinition implements DefinitionInterface
         return new $this->definitionName(...$methodArguments);
     }
 
+    /**
+     * Resolve method dependencies for class constructor
+     *
+     * @param ReflectionMethod $method
+     * @param ResolverInterface $resolver
+     *
+     * @return array
+     * @throws ReflectionException
+     * @throws UnresolvableDependencyException
+     */
     protected function resolveMethodDependencies(ReflectionMethod $method, ResolverInterface $resolver)
     {
         $methodDependencies = [];
