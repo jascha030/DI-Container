@@ -1,7 +1,7 @@
 {
   "name": "jascha030/dic",
   "description": "Simple PHP DIC Container",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "type": "library",
   "license": "MIT",
   "authors": [
