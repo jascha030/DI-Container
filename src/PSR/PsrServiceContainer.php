@@ -36,6 +36,10 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
         $this->definitions = [];
 
         foreach ($definitions as $className => $definition) {
+            if (!is_string($className)) {
+                $className = $definition;
+            }
+
             $this->setDefinition($className, $definition);
         }
     }
@@ -55,10 +59,11 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      *
      * @param $definitionName
      * @param DefinitionInterface $definition
+     * @since 1.1.0
      */
     public function setDefinition($definitionName, DefinitionInterface $definition = null)
     {
-        if ( ! $definition) {
+        if ( ! $definition || is_string($definition)) {
             $definition = ObjectDefinition::define($definitionName);
         }
 
