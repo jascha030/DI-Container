@@ -2,13 +2,11 @@
 
 namespace Jascha030\DIC\Psr;
 
+use Exception;
+use Jascha030\DIC\Definition\DefinitionInterface;
+use Jascha030\DIC\Definition\ObjectDefinition;
+use Jascha030\DIC\Resolver\ResolverInterface;
 use Psr\Container\ContainerInterface;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionParameter;
-use Jascha030\DIC\Exception\ClassNotFoundException;
-use Jascha030\DIC\Exception\ClassNotInstantiableException;
-use Jascha030\DIC\Exception\Dependency\UnresolvableDependencyException;
 
 /**
  * Class PsrServiceContainer
@@ -19,48 +17,64 @@ use Jascha030\DIC\Exception\Dependency\UnresolvableDependencyException;
  * @author Jascha van Aalst
  * @since 1.0.0
  */
-class PsrServiceContainer implements ContainerInterface
+class PsrServiceContainer implements ContainerInterface, ResolverInterface
 {
     /**
-     * @var array
+     * @var array[string] string|DefinitionInterface Instance definitions
      */
-    protected $instances = [];
+    protected $definitions = [];
+
+    /**
+     * @var array Resolved instances
+     */
+    protected $resolvedDefinitions = [];
 
     /**
      * PsrServiceContainer constructor.
      *
-     * @param array $instances
+     * @param array $definitions
      *
-     * @throws ClassNotFoundException
+     * @throws Exception
      */
-    public function __construct($instances = [])
+    public function __construct(array $definitions = [])
     {
-        if ( ! empty($instances)) {
-            foreach ($instances as $instance) {
-                $this->set($instance);
+        $definitions       = array_merge($this->definitions, $definitions);
+        $this->definitions = [];
+
+        foreach ($definitions as $className => $definition) {
+            if (!is_string($className)) {
+                $className = $definition;
             }
+
+            $this->setDefinition($className, $definition);
         }
+    }
+
+    /**
+     * Return all set definitions
+     *
+     * @return array
+     * @since 1.1.0
+     */
+    public function getDefinitions()
+    {
+        return $this->definitions;
     }
 
     /**
      * Set class or service
      *
-     * @param $className
-     * @param null $concrete
-     *
-     * @throws ClassNotFoundException
+     * @param $definitionName
+     * @param DefinitionInterface $definition
+     * @since 1.1.0
      */
-    public function set($className, $concrete = null)
+    public function setDefinition($definitionName, DefinitionInterface $definition = null)
     {
-        if ( ! class_exists($className)) {
-            throw new ClassNotFoundException("Class {$className} could not be found");
+        if ( ! $definition || is_string($definition)) {
+            $definition = ObjectDefinition::define($definitionName);
         }
 
-        if ( ! $concrete) {
-            $concrete = $className;
-        }
-
-        $this->instances[$className] = $concrete;
+        $this->definitions[$definitionName] = $definition;
     }
 
     /**
@@ -69,22 +83,14 @@ class PsrServiceContainer implements ContainerInterface
      * @param string $id
      *
      * @return mixed|object
-     * @throws ClassNotFoundException
-     * @throws ClassNotInstantiableException
-     * @throws ReflectionException
-     * @throws UnresolvableDependencyException
      */
     public function get($id)
     {
-        if ( ! $this->has($id)) {
-            $this->set($id);
-        }
-
-        return $this->resolve($this->instances[$id]);
+        return $this->resolve($id);
     }
 
     /**
-     * Check if class instance already present in instances array
+     * Checks if resolved for PSR-11 compliance
      *
      * @param string $id
      *
@@ -92,70 +98,57 @@ class PsrServiceContainer implements ContainerInterface
      */
     public function has($id)
     {
-        return array_key_exists($id, $this->instances);
+        return $this->isResolved($id);
     }
 
     /**
-     * Resolve new class instance
+     * Resolve requested definition
+     *
+     * @param $definitionName
+     *
+     * @return mixed
+     * @since 1.1.0
+     */
+    public function resolve($definitionName)
+    {
+        if ($this->isResolved($definitionName)) {
+            return $this->resolvedDefinitions[$definitionName];
+        }
+
+        if ( ! $this->isDefined($definitionName)) {
+            $this->setDefinition($definitionName);
+        }
+
+        $definition = $this->definitions[$definitionName];
+
+        $this->resolvedDefinitions[$definitionName] = $definition->resolve($this);
+
+        return $this->resolvedDefinitions[$definitionName];
+    }
+
+    /**
+     * Check if definition is already defined
      *
      * @param $className
      *
-     * @return object
-     * @throws ClassNotInstantiableException
-     * @throws UnresolvableDependencyException
-     * @throws ReflectionException
-     * @throws ClassNotFoundException
+     * @return bool
+     * @since 1.1.0
      */
-    public function resolve($className)
+    protected function isDefined($className)
     {
-        $reflected = new ReflectionClass($className);
-
-        if ( ! $reflected->isInstantiable()) {
-            throw new ClassNotInstantiableException("Class {$className} is not instantiable");
-        }
-
-        $reflectedConstructor = $reflected->getConstructor();
-
-        if ( ! $reflectedConstructor) {
-            return $reflected->newInstance();
-        }
-
-        $constructorParameters   = $reflectedConstructor->getParameters();
-        $constructorDependencies = $this->getDependencies($constructorParameters);
-
-        return $reflected->newInstanceArgs($constructorDependencies);
+        return array_key_exists($className, $this->getDefinitions());
     }
 
     /**
-     * Get class instance dependencies
+     * Check if requested definition is already resolved
      *
-     * @param $parameters
+     * @param $definition
      *
-     * @return array
-     * @throws ClassNotFoundException
-     * @throws ClassNotInstantiableException
-     * @throws UnresolvableDependencyException
-     * @throws ReflectionException
+     * @return bool
+     * @since 1.1.0
      */
-    public function getDependencies($parameters)
+    protected function isResolved($definition)
     {
-        $dependencies = [];
-
-        foreach ($parameters as $parameter) {
-            /** @var ReflectionParameter $parameter */
-            $dependency = $parameter->getClass();
-
-            if ( ! $dependency) {
-                if ($parameter->isDefaultValueAvailable()) {
-                    $dependencies[] = $parameter->getDefaultValue();
-                } else {
-                    throw new UnresolvableDependencyException("Can't resolve dependency {$parameter->name}");
-                }
-            } else {
-                $dependencies[] = $this->get($dependency->name);
-            }
-        }
-
-        return $dependencies;
+        return array_key_exists($definition, $this->resolvedDefinitions);
     }
 }

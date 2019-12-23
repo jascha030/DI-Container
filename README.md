@@ -4,7 +4,7 @@
 
 Simple PSR-11 compliant dependency injection container.
 
-## Install
+## Getting started
 ```bash
     $ composer require Jascha030/dic
 ```
