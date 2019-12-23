@@ -4,6 +4,7 @@ namespace Jascha030\DIC\Psr;
 
 use Exception;
 use Psr\Container\ContainerInterface;
+use ReflectionClass;
 
 class PsrServiceContainer implements ContainerInterface
 {
@@ -48,5 +49,39 @@ class PsrServiceContainer implements ContainerInterface
     public function resolve($className)
     {
         $reflected = new ReflectionClass($className);
+
+        if ( ! $reflected->isInstantiable()) {
+            throw new Exception("Class {$className} is not instantiable");
+        }
+
+        $reflectedConstructor = $reflected->getConstructor();
+
+        if ( ! $reflectedConstructor) {
+            return $reflected->newInstance();
+        }
+
+        $constructorParameters = $reflectedConstructor->getParameters();
+    }
+
+    public function getDependencies($parameters)
+    {
+        $dependencies = [];
+
+        foreach ($parameters as $parameter) {
+            /** @var ReflectionParameter $parameter */
+            $dependency = $parameter->getClass();
+
+            if ( ! $dependency) {
+                if ($parameter->isDefaultValueAvailable()) {
+                    $dependencies[] = $parameter->getDefaultValue();
+                } else {
+                    throw new Exception("Can't resolve dependency {$parameter->name}");
+                }
+            } else {
+                $dependencies[] = $this->get($dependency->name);
+            }
+        }
+
+        return $dependencies;
     }
 }
