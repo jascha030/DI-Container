@@ -1,5 +1,11 @@
 # Php DI Container
 
+[![Latest Stable Version](https://poser.pugx.org/jascha030/dic/v/stable)](https://packagist.org/packages/jascha030/dic)
+[![Total Downloads](https://poser.pugx.org/jascha030/dic/downloads)](https://packagist.org/packages/jascha030/dic)
+[![Latest Unstable Version](https://poser.pugx.org/jascha030/dic/v/unstable)](https://packagist.org/packages/jascha030/dic)
+[![License](https://poser.pugx.org/jascha030/dic/license)](https://packagist.org/packages/jascha030/dic)
+[![composer.lock](https://poser.pugx.org/jascha030/dic/composerlock)](https://packagist.org/packages/jascha030/dic)
+
 ## About
 
 *Simple PSR-11 compliant dependency injection container.*
