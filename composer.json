@@ -1,14 +1,23 @@
 {
   "name": "jascha030/DIC",
   "description": "Simple PHP DIC Container",
-  "version": "1.0.0-dev",
+  "version": "1.1.1",
   "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jascha van Aalst",
+      "email": "contact@jaschavanaalst.nl",
+      "role": "Developer"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "Jascha030\\DIC\\": "src/"
     }
   },
   "require": {
+    "php": ">=7.0",
     "psr/container": "^1.0"
   }
 }
