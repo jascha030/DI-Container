@@ -29,4 +29,4 @@ $userService = $container->get(UserService::class); // Get service or class inst
 $userService->printUserName(); // Outputs: My name is Jeff
 ```
 
-Full example in `src/example.php`
+Full example in [src/example.php](https://github.com/jascha030/DI-Container/blob/master/src/example.php)
