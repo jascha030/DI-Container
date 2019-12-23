@@ -9,6 +9,15 @@ class PsrServiceContainer implements ContainerInterface
 {
     protected $instances = [];
 
+    public function __construct($instances = [])
+    {
+        if (!empty($instances)) {
+            foreach ($instances as $instance) {
+                $this->set($instance);
+            }
+        }
+    }
+
     public function set($abstract, $concrete = null)
     {
         if (!class_exists($abstract)) {
