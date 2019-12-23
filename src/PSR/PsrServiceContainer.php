@@ -18,26 +18,35 @@ class PsrServiceContainer implements ContainerInterface
         }
     }
 
-    public function set($abstract, $concrete = null)
+    public function set($className, $concrete = null)
     {
-        if (!class_exists($abstract)) {
-            throw new Exception("Class {$abstract} could not be found");
+        if (!class_exists($className)) {
+            throw new Exception("Class {$className} could not be found");
         }
 
         if (!$concrete) {
-            $concrete = $abstract;
+            $concrete = $className;
         }
 
-        $this->instances[$abstract] = $concrete;
+        $this->instances[$className] = $concrete;
     }
 
     public function get($id)
     {
-        // TODO: Implement get() method.
+        if (!$this->has($id)) {
+            $this->set($id);
+        }
+
+        return $this->resolve($this->instances[$id]);
     }
 
     public function has($id)
     {
         return array_key_exists($id, $this->instances);
+    }
+
+    public function resolve($className)
+    {
+        $reflected = new ReflectionClass($className);
     }
 }
