@@ -5,6 +5,7 @@ namespace Jascha030\DIC\Psr;
 use Exception;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
+use ReflectionParameter;
 
 class PsrServiceContainer implements ContainerInterface
 {
@@ -12,7 +13,7 @@ class PsrServiceContainer implements ContainerInterface
 
     public function __construct($instances = [])
     {
-        if (!empty($instances)) {
+        if ( ! empty($instances)) {
             foreach ($instances as $instance) {
                 $this->set($instance);
             }
@@ -21,11 +22,11 @@ class PsrServiceContainer implements ContainerInterface
 
     public function set($className, $concrete = null)
     {
-        if (!class_exists($className)) {
+        if ( ! class_exists($className)) {
             throw new Exception("Class {$className} could not be found");
         }
 
-        if (!$concrete) {
+        if ( ! $concrete) {
             $concrete = $className;
         }
 
@@ -34,7 +35,7 @@ class PsrServiceContainer implements ContainerInterface
 
     public function get($id)
     {
-        if (!$this->has($id)) {
+        if ( ! $this->has($id)) {
             $this->set($id);
         }
 
@@ -61,6 +62,9 @@ class PsrServiceContainer implements ContainerInterface
         }
 
         $constructorParameters = $reflectedConstructor->getParameters();
+        $constructorDependencies = $this->getDependencies($constructorParameters);
+
+        return $reflected->newInstanceArgs($constructorDependencies);
     }
 
     public function getDependencies($parameters)
