@@ -2,10 +2,12 @@
 
 namespace Jascha030\DIC\Psr;
 
-use Exception;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionParameter;
+use Jascha030\DIC\Exception\ClassNotFoundException;
+use Jascha030\DIC\Exception\ClassNotInstantiableException;
+use Jascha030\DIC\Exception\Dependency\UnresolvableDependencyException;
 
 class PsrServiceContainer implements ContainerInterface
 {
@@ -23,7 +25,7 @@ class PsrServiceContainer implements ContainerInterface
     public function set($className, $concrete = null)
     {
         if ( ! class_exists($className)) {
-            throw new Exception("Class {$className} could not be found");
+            throw new ClassNotFoundException("Class {$className} could not be found");
         }
 
         if ( ! $concrete) {
@@ -52,7 +54,7 @@ class PsrServiceContainer implements ContainerInterface
         $reflected = new ReflectionClass($className);
 
         if ( ! $reflected->isInstantiable()) {
-            throw new Exception("Class {$className} is not instantiable");
+            throw new ClassNotInstantiableException("Class {$className} is not instantiable");
         }
 
         $reflectedConstructor = $reflected->getConstructor();
@@ -79,7 +81,7 @@ class PsrServiceContainer implements ContainerInterface
                 if ($parameter->isDefaultValueAvailable()) {
                     $dependencies[] = $parameter->getDefaultValue();
                 } else {
-                    throw new Exception("Can't resolve dependency {$parameter->name}");
+                    throw new UnresolvableDependencyException("Can't resolve dependency {$parameter->name}");
                 }
             } else {
                 $dependencies[] = $this->get($dependency->name);
