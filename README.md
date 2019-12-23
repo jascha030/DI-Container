@@ -2,7 +2,15 @@
 
 ## About
 
-Simple PSR-11 compliant dependency injection container.
+*Simple PSR-11 compliant dependency injection container.*
+
+---
+Around the the web there are many examples to be found for simple PHP DI Containers and Resolvers.
+From all the inspiration I have written a version to my own personal liking.
+Feel free to use it in your project or take it as inspiration for your own version.   
+
+For now only the object definition has been implemented but more will follow.
+
 
 ## Getting started
 ```bash
