@@ -5,6 +5,7 @@ namespace Jascha030\DIC\Psr;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
 use ReflectionParameter;
 use Jascha030\DIC\Exception\ClassNotFoundException;
 use Jascha030\DIC\Exception\ClassNotInstantiableException;
@@ -80,7 +81,7 @@ class PsrServiceContainer implements ContainerInterface
             $this->set($id);
         }
 
-        return $this->resolve($this->instances[$id]);
+        return $this->resolveDependantClass($this->instances[$id]);
     }
 
     /**
@@ -106,7 +107,7 @@ class PsrServiceContainer implements ContainerInterface
      * @throws ReflectionException
      * @throws ClassNotFoundException
      */
-    public function resolve($className)
+    protected function resolveDependantClass($className)
     {
         $reflected = new ReflectionClass($className);
 
@@ -120,26 +121,26 @@ class PsrServiceContainer implements ContainerInterface
             return $reflected->newInstance();
         }
 
-        $constructorParameters   = $reflectedConstructor->getParameters();
-        $constructorDependencies = $this->getDependencies($constructorParameters);
+        $constructorMethodDependencies = $this->resolveMethodDependencies($reflectedConstructor);
 
-        return $reflected->newInstanceArgs($constructorDependencies);
+        return $reflected->newInstanceArgs($constructorMethodDependencies);
     }
 
     /**
-     * Get class instance dependencies
+     * Get required method dependencies
      *
-     * @param $parameters
+     * @param ReflectionMethod $method
      *
      * @return array
      * @throws ClassNotFoundException
      * @throws ClassNotInstantiableException
-     * @throws UnresolvableDependencyException
      * @throws ReflectionException
+     * @throws UnresolvableDependencyException
      */
-    public function getDependencies($parameters)
+    protected function resolveMethodDependencies(ReflectionMethod $method)
     {
-        $dependencies = [];
+        $parameters   = $method->getParameters();
+        $methodDependencies = [];
 
         foreach ($parameters as $parameter) {
             /** @var ReflectionParameter $parameter */
@@ -147,15 +148,15 @@ class PsrServiceContainer implements ContainerInterface
 
             if ( ! $dependency) {
                 if ($parameter->isDefaultValueAvailable()) {
-                    $dependencies[] = $parameter->getDefaultValue();
+                    $methodDependencies[] = $parameter->getDefaultValue();
                 } else {
                     throw new UnresolvableDependencyException("Can't resolve dependency {$parameter->name}");
                 }
             } else {
-                $dependencies[] = $this->get($dependency->name);
+                $methodDependencies[] = $this->get($dependency->name);
             }
         }
 
-        return $dependencies;
+        return $methodDependencies;
     }
 }
