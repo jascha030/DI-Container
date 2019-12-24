@@ -4,7 +4,7 @@ namespace Jascha030\DIC\Resolver;
 
 use Psr\Container\ContainerInterface;
 
-class Resolver implements ResolverInterface
+class DefinitionResolver implements ResolverInterface
 {
     private $container;
 
@@ -12,17 +12,18 @@ class Resolver implements ResolverInterface
 
     public function __construct(ContainerInterface $container)
     {
+        $this->container = $container;
     }
 
     /**
      * Resolve requested definition
      *
-     * @param $definitionName
+     * @param DefinitionResolver $definition
      *
      * @return mixed
      * @since 1.1.0
      */
-    public function resolve($definitionName)
+    public function resolve(DefinitionResolver $definition)
     {
     }
 }

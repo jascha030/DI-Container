@@ -14,9 +14,9 @@ interface ResolverInterface
     /**
      * Resolve definition
      *
-     * @param $definitionName
+     * @param $definition
      *
      * @return mixed
      */
-    public function resolve($definitionName);
+    public function resolve(DefinitionResolver $definition);
 }
