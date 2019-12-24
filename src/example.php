@@ -2,7 +2,7 @@
 
 namespace Jascha030\DIC;
 
-use Jascha030\DIC\Psr\PsrServiceContainer;
+use Jascha030\DIC\Container\Psr\PsrServiceContainer;
 
 /**
  * Include psr-4 autoloader
@@ -20,6 +20,11 @@ class User
 {
     public $name = "Jeff";
 
+    /**
+     * User constructor.
+     *
+     * @param string $name
+     */
     public function __construct($name = "")
     {
         if (! empty($name)) {
@@ -39,6 +44,11 @@ class UserService
 {
     public $user;
 
+    /**
+     * UserService constructor.
+     *
+     * @param User $user
+     */
     public function __construct(User $user)
     {
         $this->user = $user;

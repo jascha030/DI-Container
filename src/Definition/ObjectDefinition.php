@@ -101,7 +101,6 @@ class ObjectDefinition implements DefinitionInterface
         foreach ($method->getParameters() as $parameter) {
             /** @var ReflectionParameter $parameter */
             $dependency = $parameter->getClass();
-
             if ($dependency) {
                 $methodDependencies[] = $resolver->resolve($dependency->getName());
             } else {
