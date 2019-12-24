@@ -111,7 +111,7 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      */
     public function resolve($definitionName)
     {
-        if ($this->isResolved($definitionName)) {
+        if ($this->has($definitionName)) {
             return $this->resolvedDefinitions[$definitionName];
         }
 
