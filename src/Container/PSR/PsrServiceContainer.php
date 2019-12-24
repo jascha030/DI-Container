@@ -39,7 +39,7 @@ class PsrServiceContainer implements ContainerInterface
     /**
      * @var DefinitionResolver
      */
-    private $resolver;
+    private $definitionResolver;
 
     /**
      * PsrServiceContainer constructor.
@@ -50,8 +50,8 @@ class PsrServiceContainer implements ContainerInterface
      */
     public function __construct(array $definitions = [])
     {
-        $this->resolver    = new DefinitionResolver($this);
-        $this->definitions = array_merge($this->definitions, $definitions);
+        $this->definitionResolver = new DefinitionResolver($this);
+        $this->definitions        = array_merge($this->definitions, $definitions);
 
         foreach ($this->definitions as $className => $definition) {
             if (! is_string($className)) {
@@ -137,14 +137,13 @@ class PsrServiceContainer implements ContainerInterface
         if (! $this->isDefined($definitionName)) {
             $this->setDefinition($definitionName);
         }
-
         $definition = $this->getDefinition($definitionName);
-
-        return $this->setResolved($definitionName, $this->resolver->resolve($definition));
+        return $this->addInstance($definitionName, $this->definitionResolver->resolve($definition));
     }
 
-    protected function setResolved($definition, $instance)
+    protected function addInstance($definition, $instance)
     {
+        if (!$this->isResolved($definition))
         $this->resolvedInstances[$definition] = $instance;
 
         return $this->resolvedInstances[$definition];
