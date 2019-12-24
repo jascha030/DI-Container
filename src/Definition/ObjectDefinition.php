@@ -60,7 +60,7 @@ class ObjectDefinition implements DefinitionInterface
      */
     public function resolve(ResolverInterface $resolver)
     {
-        if ( ! class_exists($this->definitionName)) {
+        if (! class_exists($this->definitionName)) {
             throw new ClassNotFoundException(
                 sprintf("Class \"%s\" cannot be found", $this->definitionName)
             );
