@@ -108,7 +108,7 @@ class PsrServiceContainer implements ContainerInterface
             return $this->resolvedInstances[$id];
         }
 
-        return $this->resolve($id);
+        return $this->resolveDefinition($id);
     }
 
     /**
@@ -132,7 +132,7 @@ class PsrServiceContainer implements ContainerInterface
      * @throws Exception
      * @since 1.1.0
      */
-    public function resolve($definitionName)
+    public function resolveDefinition($definitionName)
     {
         if (! $this->isDefined($definitionName)) {
             $this->setDefinition($definitionName);
