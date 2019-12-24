@@ -25,9 +25,9 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
     protected $definitions = [];
 
     /**
-     * @var array Resolved instances
+     * @var array[string] Object Resolved instances
      */
-    protected $resolvedDefinitions = [];
+    protected $resolvedInstances = [];
 
     /**
      * PsrServiceContainer constructor.
@@ -67,12 +67,17 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      * @param $definitionName
      * @param DefinitionInterface $definition
      *
+     * @throws Exception
      * @since 1.1.0
      */
     public function setDefinition($definitionName, DefinitionInterface $definition = null)
     {
+        if ($this->isDefined($definitionName)) {
+            return;
+        }
+
         if (! $definition || is_string($definition)) {
-            $definition = ObjectDefinition::define($definitionName);
+            $definition = $this->getDefinitionType($definitionName);
         }
 
         $this->definitions[$definitionName] = $definition;
@@ -84,9 +89,14 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      * @param string $id
      *
      * @return mixed|object
+     * @throws Exception
      */
     public function get($id)
     {
+        if ($this->isResolved($id)) {
+            return $this->resolvedInstances[$id];
+        }
+
         return $this->resolve($id);
     }
 
@@ -108,48 +118,69 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      * @param $definitionName
      *
      * @return mixed
+     * @throws Exception
      * @since 1.1.0
      */
     public function resolve($definitionName)
     {
-        if ($this->has($definitionName)) {
-            return $this->resolvedDefinitions[$definitionName];
-        }
-
         if (! $this->isDefined($definitionName)) {
             $this->setDefinition($definitionName);
         }
 
-        $definition = $this->definitions[$definitionName];
+        $definition = $this->getDefinition($definitionName);
 
-        $this->resolvedDefinitions[$definitionName] = $definition->resolve($this);
+        $this->resolvedInstances[$definitionName] = $definition->resolve($this);
 
-        return $this->resolvedDefinitions[$definitionName];
+        return $this->resolvedInstances[$definitionName];
     }
 
     /**
      * Check if definition is already defined
      *
-     * @param $className
+     * @param $definitionName
      *
      * @return bool
      * @since 1.1.0
      */
-    protected function isDefined($className)
+    protected function isDefined($definitionName)
     {
-        return array_key_exists($className, $this->getDefinitions());
+        return (isset($this->definitions[$definitionName]) || array_key_exists($definitionName,
+                    $this->getDefinitions())) &&
+               $this->definitions[$definitionName] instanceof DefinitionInterface;
     }
 
     /**
      * Check if requested definition is already resolved
      *
-     * @param $definition
+     * @param $id
      *
      * @return bool
      * @since 1.1.0
      */
-    protected function isResolved($definition)
+    protected function isResolved($id)
     {
-        return array_key_exists($definition, $this->resolvedDefinitions);
+        return (isset($this->resolvedInstances[$id]) || array_key_exists($id, $this->resolvedInstances));
+    }
+
+    protected function getDefinitionType($definitionName): DefinitionInterface
+    {
+        if (class_exists($definitionName) || interface_exists($definitionName)) {
+            return ObjectDefinition::define($definitionName);
+        }
+
+        throw new Exception(
+            sprintf("No valid definition type was found for \"%s\"", $definitionName)
+        );
+    }
+
+    private function getDefinition($definitionName): DefinitionInterface
+    {
+        if (! $this->isDefined($definitionName)) {
+            throw new Exception(
+                sprintf("No definition was found for \"%s\"", $definitionName)
+            );
+        }
+
+        return $this->definitions[$definitionName];
     }
 }
