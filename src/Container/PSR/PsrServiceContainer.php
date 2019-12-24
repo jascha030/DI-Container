@@ -22,7 +22,7 @@ class PsrServiceContainer implements ContainerInterface
     /**
      * @var array[string] Object
      */
-    protected $resolvedInstances = [];
+    protected $instances = [];
 
     /**
      * @var DefinitionResolver
@@ -72,11 +72,13 @@ class PsrServiceContainer implements ContainerInterface
      * @return mixed
      * @throws DefinitionNotFoundException
      * @throws DefinitionTypeNotFoundException
+     *
+     * @since 1.3.0
      */
     private function resolveInstance($id)
     {
         if ($this->isResolved($id)) {
-            return $this->resolvedInstances[$id];
+            return $this->instances[$id];
         }
 
         return $this->addInstance($id, $this->definitionResolver->resolve($id));
@@ -89,12 +91,14 @@ class PsrServiceContainer implements ContainerInterface
      * @param $concrete
      *
      * @return mixed
+     *
+     * @since 1.3.0
      */
     private function addInstance($abstract, $concrete)
     {
-        $this->resolvedInstances[$abstract] = $concrete;
+        $this->instances[$abstract] = $concrete;
 
-        return $this->resolvedInstances[$abstract];
+        return $this->instances[$abstract];
     }
 
     /**
@@ -103,10 +107,11 @@ class PsrServiceContainer implements ContainerInterface
      * @param $id
      *
      * @return bool
+     *
      * @since 1.1.0
      */
     private function isResolved($id)
     {
-        return (isset($this->resolvedInstances[$id]) || array_key_exists($id, $this->resolvedInstances));
+        return (isset($this->instances[$id]) || array_key_exists($id, $this->instances));
     }
 }
