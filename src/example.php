@@ -16,12 +16,13 @@ include "vendor/autoload.php";
  *
  * @package Jascha030\DIC
  */
-class User {
+class User
+{
     public $name = "Jeff";
 
     public function __construct($name = "")
     {
-        if (!empty($name)) {
+        if (! empty($name)) {
             $this->name = $name;
         }
     }
@@ -34,7 +35,8 @@ class User {
  *
  * @package Jascha030\DIC
  */
-class UserService {
+class UserService
+{
     public $user;
 
     public function __construct(User $user)
@@ -58,6 +60,5 @@ $container = new PsrServiceContainer();
  * You can also predefine a class with the set method or in the $instances argument of the constructor.
  */
 $us = $container->get(UserService::class);
-
 
 $us->printUserName(); //Outputs: My name is Jeff
