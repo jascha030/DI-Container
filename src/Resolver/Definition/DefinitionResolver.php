@@ -64,19 +64,6 @@ class DefinitionResolver implements ResolverInterface
     }
 
     /**
-     * Resolve requested definition
-     *
-     * @param DefinitionInterface $definition
-     *
-     * @return mixed
-     * @since 1.1.0
-     */
-    protected function resolveDefinition(DefinitionInterface $definition)
-    {
-        return $definition->resolve($this);
-    }
-
-    /**
      * @param $definitionName
      *
      * @return mixed
@@ -92,6 +79,19 @@ class DefinitionResolver implements ResolverInterface
         $definition = $this->getDefinition($definitionName);
 
         return $this->resolveDefinition($definition);
+    }
+
+    /**
+     * Resolve requested definition
+     *
+     * @param DefinitionInterface $definition
+     *
+     * @return mixed
+     * @since 1.1.0
+     */
+    protected function resolveDefinition(DefinitionInterface $definition)
+    {
+        return $definition->resolve($this);
     }
 
     /**
