@@ -2,6 +2,8 @@
 
 namespace Jascha030\DIC\Resolver;
 
+use Jascha030\DIC\Definition\DefinitionInterface;
+
 /**
  * Interface ResolverInterface
  *
@@ -18,5 +20,5 @@ interface ResolverInterface
      *
      * @return mixed
      */
-    public function resolve(DefinitionResolver $definition);
+    public function resolve(DefinitionInterface $definition);
 }

@@ -2,6 +2,7 @@
 
 namespace Jascha030\DIC\Resolver;
 
+use Jascha030\DIC\Definition\DefinitionInterface;
 use Psr\Container\ContainerInterface;
 
 class DefinitionResolver implements ResolverInterface
@@ -18,12 +19,12 @@ class DefinitionResolver implements ResolverInterface
     /**
      * Resolve requested definition
      *
-     * @param DefinitionResolver $definition
+     * @param DefinitionInterface $definition
      *
      * @return mixed
      * @since 1.1.0
      */
-    public function resolve(DefinitionResolver $definition)
+    public function resolve(DefinitionInterface $definition)
     {
     }
 }
