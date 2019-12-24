@@ -2,8 +2,6 @@
 
 namespace Jascha030\DIC\Resolver;
 
-use Jascha030\DIC\Definition\DefinitionInterface;
-use Jascha030\DIC\Definition\ObjectDefinition;
 use Psr\Container\ContainerInterface;
 
 class Resolver implements ResolverInterface

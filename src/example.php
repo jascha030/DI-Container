@@ -2,7 +2,7 @@
 
 namespace Jascha030\DIC;
 
-use Jascha030\DIC\Psr\PsrServiceContainer;
+use Jascha030\DIC\Container\Psr\PsrServiceContainer;
 
 /**
  * Include psr-4 autoloader

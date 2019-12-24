@@ -1,11 +1,11 @@
 <?php
 
-namespace Jascha030\DIC\Psr;
+namespace Jascha030\DIC\Container\Psr;
 
 use Exception;
 use Jascha030\DIC\Definition\DefinitionInterface;
 use Jascha030\DIC\Definition\ObjectDefinition;
-use Jascha030\DIC\Resolver\ResolverInterface;
+use Jascha030\DIC\Resolver\DefinitionResolver;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -17,17 +17,27 @@ use Psr\Container\ContainerInterface;
  * @author Jascha van Aalst
  * @since 1.0.0
  */
-class PsrServiceContainer implements ContainerInterface, ResolverInterface
+class PsrServiceContainer implements ContainerInterface
 {
     /**
-     * @var array[string] string|DefinitionInterface Instance definitions
+     * @var array[string] mixed null|string|DefinitionInterface
      */
     protected $definitions = [];
 
     /**
-     * @var array[string] Object Resolved instances
+     * @var array[string] DefinitionInterface
+     */
+    protected $defined = [];
+
+    /**
+     * @var array[string] Object
      */
     protected $resolvedInstances = [];
+
+    /**
+     * @var DefinitionResolver
+     */
+    private $resolver;
 
     /**
      * PsrServiceContainer constructor.
@@ -38,14 +48,13 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      */
     public function __construct(array $definitions = [])
     {
-        $definitions       = array_merge($this->definitions, $definitions);
-        $this->definitions = [];
+        $this->resolver    = new DefinitionResolver($this);
+        $this->definitions = array_merge($this->definitions, $definitions);
 
-        foreach ($definitions as $className => $definition) {
+        foreach ($this->definitions as $className => $definition) {
             if (! is_string($className)) {
                 $className = $definition;
             }
-
             $this->setDefinition($className, $definition);
         }
     }
@@ -56,9 +65,9 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      * @return array
      * @since 1.1.0
      */
-    public function getDefinitions()
+    public function getDefined()
     {
-        return $this->definitions;
+        return $this->defined;
     }
 
     /**
@@ -80,7 +89,7 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
             $definition = $this->getDefinitionType($definitionName);
         }
 
-        $this->definitions[$definitionName] = $definition;
+        $this->defined[$definitionName] = $definition;
     }
 
     /**
@@ -129,7 +138,7 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
 
         $definition = $this->getDefinition($definitionName);
 
-        $this->resolvedInstances[$definitionName] = $definition->resolve($this);
+        $this->resolvedInstances[$definitionName] = $this->resolver->resolve($definition);
 
         return $this->resolvedInstances[$definitionName];
     }
@@ -142,11 +151,11 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      * @return bool
      * @since 1.1.0
      */
-    protected function isDefined($definitionName)
+    private function isDefined($definitionName)
     {
-        return (isset($this->definitions[$definitionName]) || array_key_exists($definitionName,
-                    $this->getDefinitions())) &&
-               $this->definitions[$definitionName] instanceof DefinitionInterface;
+        return (isset($this->defined[$definitionName]) || array_key_exists($definitionName,
+                    $this->getDefined())) &&
+               $this->defined[$definitionName] instanceof DefinitionInterface;
     }
 
     /**
@@ -157,12 +166,13 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      * @return bool
      * @since 1.1.0
      */
-    protected function isResolved($id)
+    private function isResolved($id)
     {
         return (isset($this->resolvedInstances[$id]) || array_key_exists($id, $this->resolvedInstances));
     }
 
-    protected function getDefinitionType($definitionName): DefinitionInterface
+    
+    private function getDefinitionType($definitionName): DefinitionInterface
     {
         if (class_exists($definitionName) || interface_exists($definitionName)) {
             return ObjectDefinition::define($definitionName);
@@ -181,6 +191,6 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
             );
         }
 
-        return $this->definitions[$definitionName];
+        return $this->defined[$definitionName];
     }
 }
