@@ -42,6 +42,26 @@ class PsrServiceContainer implements ContainerInterface
     }
 
     /**
+     * Set definition
+     *
+     * @param $name
+     *
+     * @return bool
+     * 
+     * @since 1.4.0
+     */
+    public function set($name)
+    {
+        try {
+            $this->definitionResolver->setDefinition($name);
+        } catch (DefinitionTypeNotFoundException $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Request class instance
      *
      * @param string $id

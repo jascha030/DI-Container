@@ -33,7 +33,7 @@ class DefinitionResolver implements ResolverInterface
      *
      * @throws DefinitionTypeNotFoundException
      */
-    public function __construct(array $definitions)
+    public function __construct(array $definitions = [])
     {
         $this->definitions = array_merge($this->definitions, $definitions);
 
