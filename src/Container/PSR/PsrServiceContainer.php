@@ -7,6 +7,8 @@ use Jascha030\DIC\Definition\DefinitionInterface;
 use Jascha030\DIC\Definition\ObjectDefinition;
 use Jascha030\DIC\Resolver\DefinitionResolver;
 use Psr\Container\ContainerInterface;
+use Jascha030\DIC\Exception\Definition\DefinitionNotFoundException;
+use Jascha030\DIC\Exception\Definition\DefinitionTypeNotFoundException;
 
 /**
  * Class PsrServiceContainer
@@ -138,9 +140,14 @@ class PsrServiceContainer implements ContainerInterface
 
         $definition = $this->getDefinition($definitionName);
 
-        $this->resolvedInstances[$definitionName] = $this->resolver->resolve($definition);
+        return $this->setResolved($definitionName, $this->resolver->resolve($definition));
+    }
 
-        return $this->resolvedInstances[$definitionName];
+    protected function setResolved($definition, $instance)
+    {
+        $this->resolvedInstances[$definition] = $instance;
+
+        return $this->resolvedInstances[$definition];
     }
 
     /**
@@ -153,9 +160,8 @@ class PsrServiceContainer implements ContainerInterface
      */
     private function isDefined($definitionName)
     {
-        return (isset($this->defined[$definitionName]) || array_key_exists($definitionName,
-                    $this->getDefined())) &&
-               $this->defined[$definitionName] instanceof DefinitionInterface;
+        return (isset($this->defined[$definitionName]) || array_key_exists($definitionName, $this->getDefined()))
+               && $this->defined[$definitionName] instanceof DefinitionInterface;
     }
 
     /**
@@ -171,14 +177,13 @@ class PsrServiceContainer implements ContainerInterface
         return (isset($this->resolvedInstances[$id]) || array_key_exists($id, $this->resolvedInstances));
     }
 
-    
     private function getDefinitionType($definitionName): DefinitionInterface
     {
         if (class_exists($definitionName) || interface_exists($definitionName)) {
             return ObjectDefinition::define($definitionName);
         }
 
-        throw new Exception(
+        throw new DefinitionTypeNotFoundException(
             sprintf("No valid definition type was found for \"%s\"", $definitionName)
         );
     }
@@ -186,7 +191,7 @@ class PsrServiceContainer implements ContainerInterface
     private function getDefinition($definitionName): DefinitionInterface
     {
         if (! $this->isDefined($definitionName)) {
-            throw new Exception(
+            throw new DefinitionNotFoundException(
                 sprintf("No definition was found for \"%s\"", $definitionName)
             );
         }
