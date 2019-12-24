@@ -42,7 +42,7 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
         $this->definitions = [];
 
         foreach ($definitions as $className => $definition) {
-            if (!is_string($className)) {
+            if (! is_string($className)) {
                 $className = $definition;
             }
 
@@ -66,11 +66,12 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      *
      * @param $definitionName
      * @param DefinitionInterface $definition
+     *
      * @since 1.1.0
      */
     public function setDefinition($definitionName, DefinitionInterface $definition = null)
     {
-        if ( ! $definition || is_string($definition)) {
+        if (! $definition || is_string($definition)) {
             $definition = ObjectDefinition::define($definitionName);
         }
 
@@ -111,11 +112,11 @@ class PsrServiceContainer implements ContainerInterface, ResolverInterface
      */
     public function resolve($definitionName)
     {
-        if ($this->isResolved($definitionName)) {
+        if ($this->has($definitionName)) {
             return $this->resolvedDefinitions[$definitionName];
         }
 
-        if ( ! $this->isDefined($definitionName)) {
+        if (! $this->isDefined($definitionName)) {
             $this->setDefinition($definitionName);
         }
 

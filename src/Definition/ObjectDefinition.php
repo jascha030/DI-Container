@@ -3,8 +3,10 @@
 namespace Jascha030\DIC\Definition;
 
 use Jascha030\DIC\Exception\ClassNotFoundException;
+use Jascha030\DIC\Exception\ClassNotInstantiableException;
 use Jascha030\DIC\Exception\Dependency\UnresolvableDependencyException;
 use Jascha030\DIC\Resolver\ResolverInterface;
+use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
@@ -54,10 +56,11 @@ class ObjectDefinition implements DefinitionInterface
      * @throws ClassNotFoundException
      * @throws UnresolvableDependencyException
      * @throws ReflectionException
+     * @throws ClassNotInstantiableException
      */
     public function resolve(ResolverInterface $resolver)
     {
-        if ( ! class_exists($this->definitionName)) {
+        if (! class_exists($this->definitionName)) {
             throw new ClassNotFoundException(
                 sprintf("Class \"%s\" cannot be found", $this->definitionName)
             );
@@ -66,7 +69,14 @@ class ObjectDefinition implements DefinitionInterface
         try {
             $reflectionMethod = new ReflectionMethod($this->definitionName, "__construct");
         } catch (ReflectionException $e) {
-            return new $this->definitionName();
+            $reflectionClass = new ReflectionClass($this->definitionName);
+            if ($reflectionClass->isInstantiable()) {
+                return new $this->definitionName();
+            } else {
+                throw new ClassNotInstantiableException(
+                    sprintf("Class \"%s\" is not instantiable", $this->definitionName)
+                );
+            }
         }
 
         $methodArguments = $this->resolveMethodDependencies($reflectionMethod, $resolver);

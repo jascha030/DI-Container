@@ -20,7 +20,7 @@ For now only the object definition has been implemented but more will follow.
 
 ## Getting started
 ```bash
-    $ composer require Jascha030/dic
+    $ composer require jascha030/dic
 ```
 
 ## Usage
