@@ -12,6 +12,7 @@ use Jascha030\DIC\Resolver\ResolverInterface;
  * Class DefinitionResolver
  *
  * @package Jascha030\DIC\Resolver
+ * @since 1.3.0
  */
 class DefinitionResolver implements ResolverInterface
 {
@@ -87,7 +88,6 @@ class DefinitionResolver implements ResolverInterface
      * @param DefinitionInterface $definition
      *
      * @return mixed
-     * @since 1.1.0
      */
     protected function resolveDefinition(DefinitionInterface $definition)
     {
@@ -100,7 +100,6 @@ class DefinitionResolver implements ResolverInterface
      * @param $definitionName
      *
      * @return bool
-     * @since 1.1.0
      */
     private function isDefined($definitionName)
     {

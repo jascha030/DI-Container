@@ -72,6 +72,8 @@ class PsrServiceContainer implements ContainerInterface
      * @return mixed
      * @throws DefinitionNotFoundException
      * @throws DefinitionTypeNotFoundException
+     *
+     * @since 1.3.0
      */
     private function resolveInstance($id)
     {
@@ -89,6 +91,8 @@ class PsrServiceContainer implements ContainerInterface
      * @param $concrete
      *
      * @return mixed
+     *
+     * @since 1.3.0
      */
     private function addInstance($abstract, $concrete)
     {
@@ -103,6 +107,7 @@ class PsrServiceContainer implements ContainerInterface
      * @param $id
      *
      * @return bool
+     *
      * @since 1.1.0
      */
     private function isResolved($id)
