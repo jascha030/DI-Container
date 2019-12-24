@@ -1,11 +1,12 @@
 <?php
 
-namespace Jascha030\DIC\Resolver;
+namespace Jascha030\DIC\Resolver\Definition;
 
 use Jascha030\DIC\Definition\DefinitionInterface;
 use Jascha030\DIC\Definition\ObjectDefinition;
 use Jascha030\DIC\Exception\Definition\DefinitionNotFoundException;
 use Jascha030\DIC\Exception\Definition\DefinitionTypeNotFoundException;
+use Jascha030\DIC\Resolver\ResolverInterface;
 
 /**
  * Class DefinitionResolver
@@ -89,6 +90,7 @@ class DefinitionResolver implements ResolverInterface
         }
 
         $definition = $this->getDefinition($definitionName);
+
         return $this->resolveDefinition($definition);
     }
 
