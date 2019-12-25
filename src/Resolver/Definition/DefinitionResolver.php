@@ -32,6 +32,7 @@ class DefinitionResolver implements ResolverInterface
     /**
      * DefinitionResolver constructor.
      *
+     * @param ContainerInterface $container
      * @param array $definitions
      *
      * @throws DefinitionTypeNotFoundException

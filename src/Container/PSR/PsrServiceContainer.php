@@ -62,6 +62,7 @@ class PsrServiceContainer implements ContainerInterface
         }
 
         $this->resolve($name);
+
         return true;
     }
 
@@ -79,7 +80,7 @@ class PsrServiceContainer implements ContainerInterface
             $this->set($id);
         }
 
-        if (!$this->entries[$id] instanceof Closure) {
+        if ($this->entries[$id] instanceof Closure) {
             return call_user_func($this->entries[$id]);
         }
 
@@ -121,7 +122,7 @@ class PsrServiceContainer implements ContainerInterface
      *
      * @since 1.3.0
      */
-    private function add($abstract, Closure $closure)
+    private function add($abstract, $closure)
     {
         $this->entries[$abstract] = $closure;
     }

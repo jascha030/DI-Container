@@ -86,8 +86,19 @@ class ObjectDefinition implements DefinitionInterface
         $methodArguments = $this->resolveMethodDependencies($reflectionMethod, $resolver);
 
         return function () use ($methodArguments) {
+            array_walk($methodArguments, [$this, 'isClosure']);
+
             return new $this->definitionName(...$methodArguments);
         };
+    }
+
+    public function isClosure(&$dependency, $index)
+    {
+        if ($dependency instanceof \Closure) {
+            $dependency = call_user_func($dependency);
+        }
+
+        return $dependency;
     }
 
     /**
@@ -108,7 +119,7 @@ class ObjectDefinition implements DefinitionInterface
             /** @var ReflectionParameter $parameter */
             $dependency = $parameter->getClass();
             if ($dependency) {
-                $methodDependencies[] = call_user_func($resolver->resolve($dependency->getName()));
+                $methodDependencies[] = $resolver->resolve($dependency->getName());
             } else {
                 if ($parameter->isDefaultValueAvailable()) {
                     $methodDependencies[] = $parameter->getDefaultValue();
