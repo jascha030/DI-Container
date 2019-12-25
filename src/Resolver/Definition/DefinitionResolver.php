@@ -15,8 +15,6 @@ use Jascha030\DIC\Resolver\DefinitionResolverInterface;
  */
 class DefinitionResolver implements DefinitionResolverInterface
 {
-    public $container;
-
     /**
      * @var array[string] DefinitionInterface
      */
@@ -95,7 +93,7 @@ class DefinitionResolver implements DefinitionResolverInterface
      */
     private function isDefined($definitionName)
     {
-        return (isset($this->defined[$definitionName]) || array_key_exists($definitionName, $this->definitions))
+        return (isset($this->defined[$definitionName]) || array_key_exists($definitionName, $this->defined))
                && $this->defined[$definitionName] instanceof DefinitionInterface;
     }
 
