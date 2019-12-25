@@ -20,5 +20,5 @@ interface DefinitionInterface
      *
      * @return mixed
      */
-    public function resolve(ResolverInterface $resolver);
+    public function resolve(ResolverInterface $resolver): \Closure;
 }

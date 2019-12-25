@@ -2,6 +2,7 @@
 
 namespace Jascha030\DIC\Container\Psr;
 
+use Closure;
 use Exception;
 use Jascha030\DIC\Exception\Definition\DefinitionNotFoundException;
 use Jascha030\DIC\Exception\Definition\DefinitionTypeNotFoundException;
@@ -22,7 +23,7 @@ class PsrServiceContainer implements ContainerInterface
     /**
      * @var array[string] Object
      */
-    protected $instances = [];
+    protected $entries = [];
 
     /**
      * @var DefinitionResolver
@@ -38,7 +39,30 @@ class PsrServiceContainer implements ContainerInterface
      */
     public function __construct(array $definitions = [])
     {
-        $this->definitionResolver = new DefinitionResolver($definitions);
+        $this->definitionResolver = new DefinitionResolver($this, $definitions);
+    }
+
+    /**
+     * Set definition
+     *
+     * @param $name
+     *
+     * @return bool
+     *
+     * @throws DefinitionNotFoundException
+     * @throws DefinitionTypeNotFoundException
+     * @since 1.4.0
+     */
+    public function set($name)
+    {
+        try {
+            $this->definitionResolver->setDefinition($name);
+        } catch (DefinitionTypeNotFoundException $e) {
+            return false;
+        }
+
+        $this->resolve($name);
+        return true;
     }
 
     /**
@@ -51,7 +75,11 @@ class PsrServiceContainer implements ContainerInterface
      */
     public function get($id)
     {
-        return $this->resolveInstance($id);
+        if (! $this->isResolved($id)) {
+            $this->set($id);
+        }
+
+        return call_user_func($this->entries[$id]);
     }
 
     /**
@@ -69,36 +97,29 @@ class PsrServiceContainer implements ContainerInterface
     /**
      * @param $id
      *
-     * @return mixed
      * @throws DefinitionNotFoundException
      * @throws DefinitionTypeNotFoundException
      *
      * @since 1.3.0
      */
-    private function resolveInstance($id)
+    private function resolve($id)
     {
-        if ($this->isResolved($id)) {
-            return $this->instances[$id];
+        if (! $this->isResolved($id)) {
+            $this->add($id, $this->definitionResolver->resolve($id));
         }
-
-        return $this->addInstance($id, $this->definitionResolver->resolve($id));
     }
 
     /**
      * Add instance to resolvedInstance
      *
      * @param $abstract
-     * @param $concrete
-     *
-     * @return mixed
+     * @param Closure $closure
      *
      * @since 1.3.0
      */
-    private function addInstance($abstract, $concrete)
+    private function add($abstract, Closure $closure)
     {
-        $this->instances[$abstract] = $concrete;
-
-        return $this->instances[$abstract];
+        $this->entries[$abstract] = $closure;
     }
 
     /**
@@ -112,6 +133,6 @@ class PsrServiceContainer implements ContainerInterface
      */
     private function isResolved($id)
     {
-        return (isset($this->instances[$id]) || array_key_exists($id, $this->instances));
+        return (isset($this->entries[$id]) || array_key_exists($id, $this->entries));
     }
 }

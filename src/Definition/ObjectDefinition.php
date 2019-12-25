@@ -58,7 +58,7 @@ class ObjectDefinition implements DefinitionInterface
      * @throws ReflectionException
      * @throws ClassNotInstantiableException
      */
-    public function resolve(ResolverInterface $resolver)
+    public function resolve(ResolverInterface $resolver): \Closure
     {
         if (! class_exists($this->definitionName)) {
             throw new ClassNotFoundException(
@@ -69,9 +69,13 @@ class ObjectDefinition implements DefinitionInterface
         try {
             $reflectionMethod = new ReflectionMethod($this->definitionName, "__construct");
         } catch (ReflectionException $e) {
+
             $reflectionClass = new ReflectionClass($this->definitionName);
+
             if ($reflectionClass->isInstantiable()) {
-                return new $this->definitionName();
+                return function () {
+                    return new $this->definitionName();
+                };
             } else {
                 throw new ClassNotInstantiableException(
                     sprintf("Class \"%s\" is not instantiable", $this->definitionName)
@@ -81,7 +85,9 @@ class ObjectDefinition implements DefinitionInterface
 
         $methodArguments = $this->resolveMethodDependencies($reflectionMethod, $resolver);
 
-        return new $this->definitionName(...$methodArguments);
+        return function () use ($methodArguments) {
+            return new $this->definitionName(...$methodArguments);
+        };
     }
 
     /**
@@ -102,7 +108,7 @@ class ObjectDefinition implements DefinitionInterface
             /** @var ReflectionParameter $parameter */
             $dependency = $parameter->getClass();
             if ($dependency) {
-                $methodDependencies[] = $resolver->resolve($dependency->getName());
+                $methodDependencies[] = call_user_func($resolver->resolve($dependency->getName()));
             } else {
                 if ($parameter->isDefaultValueAvailable()) {
                     $methodDependencies[] = $parameter->getDefaultValue();

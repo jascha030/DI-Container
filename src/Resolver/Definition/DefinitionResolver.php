@@ -7,6 +7,7 @@ use Jascha030\DIC\Definition\ObjectDefinition;
 use Jascha030\DIC\Exception\Definition\DefinitionNotFoundException;
 use Jascha030\DIC\Exception\Definition\DefinitionTypeNotFoundException;
 use Jascha030\DIC\Resolver\ResolverInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Class DefinitionResolver
@@ -16,6 +17,8 @@ use Jascha030\DIC\Resolver\ResolverInterface;
  */
 class DefinitionResolver implements ResolverInterface
 {
+    public $container;
+
     /**
      * @var array[string] mixed null|string|DefinitionInterface
      */
@@ -33,8 +36,9 @@ class DefinitionResolver implements ResolverInterface
      *
      * @throws DefinitionTypeNotFoundException
      */
-    public function __construct(array $definitions)
+    public function __construct(ContainerInterface $container, array $definitions = [])
     {
+        $this->container   = $container;
         $this->definitions = array_merge($this->definitions, $definitions);
 
         foreach ($this->definitions as $className => $definition) {
@@ -71,7 +75,7 @@ class DefinitionResolver implements ResolverInterface
      * @throws DefinitionNotFoundException
      * @throws DefinitionTypeNotFoundException
      */
-    public function resolve($definitionName)
+    public function resolve($definitionName): \Closure
     {
         if (! $this->isDefined($definitionName)) {
             $this->setDefinition($definitionName);
