@@ -5,7 +5,7 @@ namespace Jascha030\DIC\Definition;
 use Jascha030\DIC\Exception\ClassNotFoundException;
 use Jascha030\DIC\Exception\ClassNotInstantiableException;
 use Jascha030\DIC\Exception\Dependency\UnresolvableDependencyException;
-use Jascha030\DIC\Resolver\ResolverInterface;
+use Jascha030\DIC\Resolver\DefinitionResolverInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -50,7 +50,7 @@ class ObjectDefinition implements DefinitionInterface
     /**
      * Resolve object definition
      *
-     * @param ResolverInterface $resolver
+     * @param DefinitionResolverInterface $resolver
      *
      * @return mixed
      * @throws ClassNotFoundException
@@ -58,7 +58,7 @@ class ObjectDefinition implements DefinitionInterface
      * @throws ReflectionException
      * @throws ClassNotInstantiableException
      */
-    public function resolve(ResolverInterface $resolver): \Closure
+    public function resolve(DefinitionResolverInterface $resolver): \Closure
     {
         if (! class_exists($this->definitionName)) {
             throw new ClassNotFoundException(
@@ -105,13 +105,13 @@ class ObjectDefinition implements DefinitionInterface
      * Resolve method dependencies for class constructor
      *
      * @param ReflectionMethod $method
-     * @param ResolverInterface $resolver
+     * @param DefinitionResolverInterface $resolver
      *
      * @return array
      * @throws ReflectionException
      * @throws UnresolvableDependencyException
      */
-    protected function resolveMethodDependencies(ReflectionMethod $method, ResolverInterface $resolver)
+    protected function resolveMethodDependencies(ReflectionMethod $method, DefinitionResolverInterface $resolver)
     {
         $methodDependencies = [];
 
@@ -119,7 +119,8 @@ class ObjectDefinition implements DefinitionInterface
             /** @var ReflectionParameter $parameter */
             $dependency = $parameter->getClass();
             if ($dependency) {
-                $methodDependencies[] = $resolver->resolve($dependency->getName());
+                $dependencyDefinition = $resolver->getDefinition($dependency->getName());
+                $methodDependencies[] = $resolver->resolve($dependencyDefinition);
             } else {
                 if ($parameter->isDefaultValueAvailable()) {
                     $methodDependencies[] = $parameter->getDefaultValue();

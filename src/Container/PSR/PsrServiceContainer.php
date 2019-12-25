@@ -4,7 +4,6 @@ namespace Jascha030\DIC\Container\Psr;
 
 use Closure;
 use Exception;
-use Jascha030\DIC\Exception\Definition\DefinitionNotFoundException;
 use Jascha030\DIC\Exception\Definition\DefinitionTypeNotFoundException;
 use Jascha030\DIC\Resolver\Definition\DefinitionResolver;
 use Psr\Container\ContainerInterface;
@@ -33,13 +32,11 @@ class PsrServiceContainer implements ContainerInterface
     /**
      * PsrServiceContainer constructor.
      *
-     * @param array $definitions
-     *
      * @throws Exception
      */
-    public function __construct(array $definitions = [])
+    public function __construct()
     {
-        $this->definitionResolver = new DefinitionResolver($this, $definitions);
+        $this->definitionResolver = new DefinitionResolver();
     }
 
     /**
@@ -49,7 +46,6 @@ class PsrServiceContainer implements ContainerInterface
      *
      * @return bool
      *
-     * @throws DefinitionNotFoundException
      * @throws DefinitionTypeNotFoundException
      * @since 1.4.0
      */
@@ -102,7 +98,6 @@ class PsrServiceContainer implements ContainerInterface
     /**
      * @param $id
      *
-     * @throws DefinitionNotFoundException
      * @throws DefinitionTypeNotFoundException
      *
      * @since 1.3.0
@@ -110,7 +105,9 @@ class PsrServiceContainer implements ContainerInterface
     private function resolve($id)
     {
         if (! $this->isResolved($id)) {
-            $this->add($id, $this->definitionResolver->resolve($id));
+            $definition = $this->definitionResolver->getDefinition($id);
+
+            $this->add($id, $this->definitionResolver->resolve($definition));
         }
     }
 
