@@ -27,6 +27,25 @@ For now only the object definition has been implemented but more will follow.
 
 Short example:
 
+Class UserService with dependency User.
+
+```php
+class UserService
+{
+    public $user;
+
+    public function __construct(User $user)
+    {
+        $this->user = $user;
+    }
+
+    public function printUserName()
+    {
+        echo "My name is " . $this->user->name;
+    }
+}
+```
+
 ```php
 $container = new PsrServiceContainer(); // Instantiate container
 
