@@ -79,7 +79,11 @@ class PsrServiceContainer implements ContainerInterface
             $this->set($id);
         }
 
-        return call_user_func($this->entries[$id]);
+        if (!$this->entries[$id] instanceof Closure) {
+            return call_user_func($this->entries[$id]);
+        }
+
+        return $this->entries[$id];
     }
 
     /**
