@@ -25,13 +25,4 @@ interface DefinitionInterface
      * @return mixed
      */
     public function setName(string $name);
-
-    /**
-     * Resolve definition type
-     *
-     * @param DefinitionResolverInterface $resolver
-     *
-     * @return mixed
-     */
-    public function resolve(DefinitionResolverInterface $resolver): Closure;
 }
