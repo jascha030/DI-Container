@@ -2,6 +2,7 @@
 
 namespace Jascha030\DIC\Resolver\Definition;
 
+use Closure;
 use Jascha030\DIC\Definition\DefinitionInterface;
 use Jascha030\DIC\Definition\ObjectDefinition;
 use Jascha030\DIC\Exception\Definition\DefinitionTypeNotFoundException;
@@ -98,10 +99,10 @@ class DefinitionResolver implements DefinitionResolverInterface
     /**
      * @param $definitionName
      *
-     * @return \Closure
+     * @return Closure
      * @throws DefinitionTypeNotFoundException
      */
-    private function getDefinitionType($definitionName): \Closure
+    private function getDefinitionType($definitionName): Closure
     {
         if (! class_exists($definitionName) && ! interface_exists($definitionName)) {
             throw new DefinitionTypeNotFoundException(

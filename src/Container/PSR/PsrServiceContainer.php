@@ -53,6 +53,7 @@ class PsrServiceContainer implements ContainerInterface
      * @param null $value
      *
      * @return bool|void
+     * @throws Exception
      * @since 1.4.0
      */
     public function set(string $name, $value = null)
@@ -115,6 +116,7 @@ class PsrServiceContainer implements ContainerInterface
      * @param DefinitionInterface|null $definition
      *
      * @throws DefinitionTypeNotFoundException
+     * @throws Exception
      * @since 1.3.0
      */
     private function resolveDefinition($name, DefinitionInterface $definition = null)
