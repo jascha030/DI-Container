@@ -14,6 +14,18 @@ use Jascha030\DIC\Resolver\DefinitionResolverInterface;
 interface DefinitionInterface
 {
     /**
+     * @return string
+     */
+    public function getName(): string;
+
+    /**
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function setName(string $name);
+
+    /**
      * Resolve definition type
      *
      * @param DefinitionResolverInterface $resolver

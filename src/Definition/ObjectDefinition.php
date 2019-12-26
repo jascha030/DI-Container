@@ -21,9 +21,9 @@ use ReflectionParameter;
 class ObjectDefinition implements DefinitionInterface
 {
     /**
-     * @var string $definitionName
+     * @var string $name
      */
-    protected $definitionName;
+    protected $name;
 
     /**
      * ObjectDefinition constructor.
@@ -32,7 +32,7 @@ class ObjectDefinition implements DefinitionInterface
      */
     public function __construct($className)
     {
-        $this->definitionName = $className;
+        $this->name = $className;
     }
 
     /**
@@ -48,6 +48,22 @@ class ObjectDefinition implements DefinitionInterface
     }
 
     /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName(string $name)
+    {
+        $this->name = $name;
+    }
+
+    /**
      * Resolve object definition
      *
      * @param DefinitionResolverInterface $resolver
@@ -60,25 +76,25 @@ class ObjectDefinition implements DefinitionInterface
      */
     public function resolve(DefinitionResolverInterface $resolver): \Closure
     {
-        if (! class_exists($this->definitionName)) {
+        if (! class_exists($this->name)) {
             throw new ClassNotFoundException(
-                sprintf("Class \"%s\" cannot be found", $this->definitionName)
+                sprintf("Class \"%s\" cannot be found", $this->name)
             );
         }
 
         try {
-            $reflectionMethod = new ReflectionMethod($this->definitionName, "__construct");
+            $reflectionMethod = new ReflectionMethod($this->name, "__construct");
         } catch (ReflectionException $e) {
 
-            $reflectionClass = new ReflectionClass($this->definitionName);
+            $reflectionClass = new ReflectionClass($this->name);
 
             if ($reflectionClass->isInstantiable()) {
                 return function () {
-                    return new $this->definitionName();
+                    return new $this->name();
                 };
             } else {
                 throw new ClassNotInstantiableException(
-                    sprintf("Class \"%s\" is not instantiable", $this->definitionName)
+                    sprintf("Class \"%s\" is not instantiable", $this->name)
                 );
             }
         }
@@ -88,10 +104,16 @@ class ObjectDefinition implements DefinitionInterface
         return function () use ($methodArguments) {
             array_walk($methodArguments, [$this, 'isClosure']);
 
-            return new $this->definitionName(...$methodArguments);
+            return new $this->name(...$methodArguments);
         };
     }
 
+    /**
+     * @param $dependency
+     * @param $index
+     *
+     * @return mixed
+     */
     public function isClosure(&$dependency, $index)
     {
         if ($dependency instanceof \Closure) {
