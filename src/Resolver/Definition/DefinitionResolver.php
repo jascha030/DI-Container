@@ -7,6 +7,7 @@ use Exception;
 use Jascha030\DIC\Definition\DefinitionInterface;
 use Jascha030\DIC\Definition\ObjectDefinition;
 use Jascha030\DIC\Exception\Definition\DefinitionTypeNotFoundException;
+use Jascha030\DIC\Exception\Resolver\ResolverNotFoundException;
 use Jascha030\DIC\Resolver\DefinitionResolverInterface;
 use Jascha030\DIC\Resolver\Object\ObjectResolver;
 
@@ -130,13 +131,13 @@ class DefinitionResolver implements DefinitionResolverInterface
      * @param string $definitionType
      *
      * @return DefinitionResolverInterface
-     * @throws Exception
+     * @throws ResolverNotFoundException
      * @since 1.5.0
      */
     private function getResolver(string $definitionType): DefinitionResolverInterface
     {
         if (! array_key_exists($definitionType, $this->availableResolvers)) {
-            throw new Exception(
+            throw new ResolverNotFoundException(
                 sprintf("No available resolver found for definition \"%s\"", $definitionType)
             );
         }
