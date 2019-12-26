@@ -2,6 +2,7 @@
 
 namespace Jascha030\DIC\Definition;
 
+use Closure;
 use Jascha030\DIC\Exception\ClassNotFoundException;
 use Jascha030\DIC\Exception\ClassNotInstantiableException;
 use Jascha030\DIC\Exception\Dependency\UnresolvableDependencyException;
@@ -74,7 +75,7 @@ class ObjectDefinition implements DefinitionInterface
      * @throws ReflectionException
      * @throws ClassNotInstantiableException
      */
-    public function resolve(DefinitionResolverInterface $resolver): \Closure
+    public function resolve(DefinitionResolverInterface $resolver): Closure
     {
         if (! class_exists($this->name)) {
             throw new ClassNotFoundException(
@@ -110,13 +111,12 @@ class ObjectDefinition implements DefinitionInterface
 
     /**
      * @param $dependency
-     * @param $index
      *
      * @return mixed
      */
-    public function isClosure(&$dependency, $index)
+    public function isClosure(&$dependency)
     {
-        if ($dependency instanceof \Closure) {
+        if ($dependency instanceof Closure) {
             $dependency = call_user_func($dependency);
         }
 

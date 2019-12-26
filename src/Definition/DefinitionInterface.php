@@ -2,6 +2,7 @@
 
 namespace Jascha030\DIC\Definition;
 
+use Closure;
 use Jascha030\DIC\Resolver\DefinitionResolverInterface;
 
 /**
@@ -32,5 +33,5 @@ interface DefinitionInterface
      *
      * @return mixed
      */
-    public function resolve(DefinitionResolverInterface $resolver): \Closure;
+    public function resolve(DefinitionResolverInterface $resolver): Closure;
 }
