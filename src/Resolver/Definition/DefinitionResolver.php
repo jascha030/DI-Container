@@ -30,10 +30,6 @@ class DefinitionResolver implements DefinitionResolverInterface
     public function __construct(array $definitions = [])
     {
         foreach ($definitions as $definitionName => $definition) {
-            if (! $this->isDefined($definitionName)) {
-                continue;
-            }
-
             if (! is_string($definitionName)) {
                 $definitionName = $definition;
             }
@@ -50,6 +46,10 @@ class DefinitionResolver implements DefinitionResolverInterface
      */
     public function setDefinition($definitionName, DefinitionInterface $definition = null)
     {
+        if ($this->isDefined($definitionName)) {
+            return;
+        }
+
         if (! $definition || is_string($definition)) {
             $definition = $this->getDefinitionType($definitionName);
         }
@@ -65,11 +65,9 @@ class DefinitionResolver implements DefinitionResolverInterface
      */
     public function getDefinition($definitionName): DefinitionInterface
     {
-        if (! $this->isDefined($definitionName)) {
-            $this->setDefinition($definitionName);
-        }
+        $this->setDefinition($definitionName);
 
-        return $this->defined[$definitionName];
+        return call_user_func($this->defined[$definitionName]);
     }
 
     /**
@@ -100,17 +98,19 @@ class DefinitionResolver implements DefinitionResolverInterface
     /**
      * @param $definitionName
      *
-     * @return DefinitionInterface
+     * @return \Closure
      * @throws DefinitionTypeNotFoundException
      */
-    private function getDefinitionType($definitionName): DefinitionInterface
+    private function getDefinitionType($definitionName): \Closure
     {
-        if (class_exists($definitionName) || interface_exists($definitionName)) {
-            return ObjectDefinition::define($definitionName);
+        if (! class_exists($definitionName) && ! interface_exists($definitionName)) {
+            throw new DefinitionTypeNotFoundException(
+                sprintf("No valid definition type was found for \"%s\"", $definitionName)
+            );
         }
 
-        throw new DefinitionTypeNotFoundException(
-            sprintf("No valid definition type was found for \"%s\"", $definitionName)
-        );
+        return function () use ($definitionName) {
+            return ObjectDefinition::define($definitionName);
+        };
     }
 }
