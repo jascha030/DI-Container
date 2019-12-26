@@ -2,7 +2,8 @@
 
 namespace Jascha030\DIC\Definition;
 
-use Jascha030\DIC\Resolver\ResolverInterface;
+use Closure;
+use Jascha030\DIC\Resolver\DefinitionResolverInterface;
 
 /**
  * Interface DefinitionInterface
@@ -14,11 +15,23 @@ use Jascha030\DIC\Resolver\ResolverInterface;
 interface DefinitionInterface
 {
     /**
-     * Resolve definition type
-     *
-     * @param ResolverInterface $resolver
+     * @return string
+     */
+    public function getName(): string;
+
+    /**
+     * @param string $name
      *
      * @return mixed
      */
-    public function resolve(ResolverInterface $resolver);
+    public function setName(string $name);
+
+    /**
+     * Resolve definition type
+     *
+     * @param DefinitionResolverInterface $resolver
+     *
+     * @return mixed
+     */
+    public function resolve(DefinitionResolverInterface $resolver): Closure;
 }
