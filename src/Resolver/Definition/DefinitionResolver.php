@@ -3,10 +3,12 @@
 namespace Jascha030\DIC\Resolver\Definition;
 
 use Closure;
+use Exception;
 use Jascha030\DIC\Definition\DefinitionInterface;
 use Jascha030\DIC\Definition\ObjectDefinition;
 use Jascha030\DIC\Exception\Definition\DefinitionTypeNotFoundException;
 use Jascha030\DIC\Resolver\DefinitionResolverInterface;
+use Jascha030\DIC\Resolver\Object\ObjectResolver;
 
 /**
  * Class DefinitionResolver
@@ -20,6 +22,10 @@ class DefinitionResolver implements DefinitionResolverInterface
      * @var array[string] DefinitionInterface
      */
     protected $defined = [];
+
+    private $availableResolvers = [
+        ObjectDefinition::class => ObjectResolver::class
+    ];
 
     /**
      * DefinitionResolver constructor.
@@ -77,10 +83,14 @@ class DefinitionResolver implements DefinitionResolverInterface
      * @param DefinitionInterface $definition
      *
      * @return mixed
+     * @throws Exception
      */
     public function resolve(DefinitionInterface $definition)
     {
-        return $definition->resolve($this);
+        $definitionType = get_class($definition);
+        $resolver       = $this->getResolver($definitionType);
+
+        return $resolver->resolve($definition);
     }
 
     /**
@@ -113,5 +123,26 @@ class DefinitionResolver implements DefinitionResolverInterface
         return function () use ($definitionName) {
             return ObjectDefinition::define($definitionName);
         };
+    }
+
+
+    /**
+     * @param string $definitionType
+     *
+     * @return DefinitionResolverInterface
+     * @throws Exception
+     * @since 1.5.0
+     */
+    private function getResolver(string $definitionType): DefinitionResolverInterface
+    {
+        if (! array_key_exists($definitionType, $this->availableResolvers)) {
+            throw new Exception(
+                sprintf("No available resolver found for definition \"%s\"", $definitionType)
+            );
+        }
+
+        $resolverType = $this->availableResolvers[$definitionType];
+
+        return new $resolverType($this);
     }
 }
