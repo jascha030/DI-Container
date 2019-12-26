@@ -6,6 +6,7 @@ use Closure;
 use Exception;
 use Jascha030\DIC\Definition\DefinitionInterface;
 use Jascha030\DIC\Exception\Definition\DefinitionTypeNotFoundException;
+use Jascha030\DIC\Exception\Dependency\CircularDependencyException;
 use Jascha030\DIC\Resolver\Definition\DefinitionResolver;
 use Psr\Container\ContainerInterface;
 
@@ -116,7 +117,7 @@ class PsrServiceContainer implements ContainerInterface
      * @param DefinitionInterface|null $definition
      *
      * @throws DefinitionTypeNotFoundException
-     * @throws Exception
+     * @throws CircularDependencyException
      * @since 1.3.0
      */
     private function resolveDefinition($name, DefinitionInterface $definition = null)
@@ -126,7 +127,7 @@ class PsrServiceContainer implements ContainerInterface
         }
 
         if ($this->beingResolved($name)) {
-            throw new Exception(
+            throw new CircularDependencyException(
                 sprintf("Circular dependency detected for entry \"%s\"", $name)
             );
         }

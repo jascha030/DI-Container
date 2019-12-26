@@ -2,13 +2,14 @@
 
 namespace Jascha030\DIC\Exception\Definition;
 
-use Exception;
+use Jascha030\DIC\Exception\ClassNotFoundException;
 
 /**
  * Class DefinitionNotFoundException
  *
  * @package Jascha030\DIC\Exception\Definition
+ * @since 1.3.0
  */
-class DefinitionNotFoundException extends Exception
+class DefinitionNotFoundException extends ClassNotFoundException
 {
 }
