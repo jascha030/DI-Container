@@ -4,10 +4,8 @@ namespace Jascha030\DIC\Resolver\Definition;
 
 use Jascha030\DIC\Definition\DefinitionInterface;
 use Jascha030\DIC\Definition\ObjectDefinition;
-use Jascha030\DIC\Exception\Definition\DefinitionNotFoundException;
 use Jascha030\DIC\Exception\Definition\DefinitionTypeNotFoundException;
-use Jascha030\DIC\Resolver\ResolverInterface;
-use Psr\Container\ContainerInterface;
+use Jascha030\DIC\Resolver\DefinitionResolverInterface;
 
 /**
  * Class DefinitionResolver
@@ -15,15 +13,8 @@ use Psr\Container\ContainerInterface;
  * @package Jascha030\DIC\Resolver
  * @since 1.3.0
  */
-class DefinitionResolver implements ResolverInterface
+class DefinitionResolver implements DefinitionResolverInterface
 {
-    public $container;
-
-    /**
-     * @var array[string] mixed null|string|DefinitionInterface
-     */
-    protected $definitions = [];
-
     /**
      * @var array[string] DefinitionInterface
      */
@@ -32,21 +23,18 @@ class DefinitionResolver implements ResolverInterface
     /**
      * DefinitionResolver constructor.
      *
-     * @param ContainerInterface $container
      * @param array $definitions
      *
      * @throws DefinitionTypeNotFoundException
      */
-    public function __construct(ContainerInterface $container, array $definitions = [])
+    public function __construct(array $definitions = [])
     {
-        $this->container   = $container;
-        $this->definitions = array_merge($this->definitions, $definitions);
-
-        foreach ($this->definitions as $className => $definition) {
-            if (! is_string($className)) {
-                $className = $definition;
+        foreach ($definitions as $definitionName => $definition) {
+            if (! is_string($definitionName)) {
+                $definitionName = $definition;
             }
-            $this->setDefinition($className, $definition);
+
+            $this->setDefinition($definitionName, $definition);
         }
     }
 
@@ -72,19 +60,14 @@ class DefinitionResolver implements ResolverInterface
     /**
      * @param $definitionName
      *
-     * @return mixed
-     * @throws DefinitionNotFoundException
+     * @return DefinitionInterface
      * @throws DefinitionTypeNotFoundException
      */
-    public function resolve($definitionName): \Closure
+    public function getDefinition($definitionName): DefinitionInterface
     {
-        if (! $this->isDefined($definitionName)) {
-            $this->setDefinition($definitionName);
-        }
+        $this->setDefinition($definitionName);
 
-        $definition = $this->getDefinition($definitionName);
-
-        return $this->resolveDefinition($definition);
+        return call_user_func($this->defined[$definitionName]);
     }
 
     /**
@@ -94,7 +77,7 @@ class DefinitionResolver implements ResolverInterface
      *
      * @return mixed
      */
-    protected function resolveDefinition(DefinitionInterface $definition)
+    public function resolve(DefinitionInterface $definition)
     {
         return $definition->resolve($this);
     }
@@ -108,41 +91,26 @@ class DefinitionResolver implements ResolverInterface
      */
     private function isDefined($definitionName)
     {
-        return (isset($this->defined[$definitionName]) || array_key_exists($definitionName, $this->definitions))
+        return (isset($this->defined[$definitionName]) || array_key_exists($definitionName, $this->defined))
                && $this->defined[$definitionName] instanceof DefinitionInterface;
     }
 
     /**
      * @param $definitionName
      *
-     * @return DefinitionInterface
+     * @return \Closure
      * @throws DefinitionTypeNotFoundException
      */
-    private function getDefinitionType($definitionName): DefinitionInterface
+    private function getDefinitionType($definitionName): \Closure
     {
-        if (class_exists($definitionName) || interface_exists($definitionName)) {
-            return ObjectDefinition::define($definitionName);
-        }
-
-        throw new DefinitionTypeNotFoundException(
-            sprintf("No valid definition type was found for \"%s\"", $definitionName)
-        );
-    }
-
-    /**
-     * @param $definitionName
-     *
-     * @return DefinitionInterface
-     * @throws DefinitionNotFoundException
-     */
-    private function getDefinition($definitionName): DefinitionInterface
-    {
-        if (! $this->isDefined($definitionName)) {
-            throw new DefinitionNotFoundException(
-                sprintf("No definition was found for \"%s\"", $definitionName)
+        if (! class_exists($definitionName) && ! interface_exists($definitionName)) {
+            throw new DefinitionTypeNotFoundException(
+                sprintf("No valid definition type was found for \"%s\"", $definitionName)
             );
         }
 
-        return $this->defined[$definitionName];
+        return function () use ($definitionName) {
+            return ObjectDefinition::define($definitionName);
+        };
     }
 }
