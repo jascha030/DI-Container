@@ -3,6 +3,7 @@
 namespace Jascha030\DIC\Resolver\Object;
 
 use Closure;
+use Jascha030\DIC\Container\Psr\PsrServiceContainer;
 use Jascha030\DIC\Definition\DefinitionInterface;
 use Jascha030\DIC\Definition\ObjectDefinition;
 use Jascha030\DIC\Exception\ClassNotFoundException;
@@ -66,9 +67,7 @@ class ObjectResolver implements DefinitionResolverInterface
         $definitionName = $definition->getName();
 
         if (! class_exists($definitionName)) {
-            throw new ClassNotFoundException(
-                sprintf("Class \"%s\" cannot be found", $definitionName)
-            );
+            throw new ClassNotFoundException(sprintf("Class \"%s\" cannot be found", $definitionName));
         }
 
         try {
@@ -82,9 +81,8 @@ class ObjectResolver implements DefinitionResolverInterface
                     return new $definitionName();
                 };
             } else {
-                throw new ClassNotInstantiableException(
-                    sprintf("Class \"%s\" is not instantiable", $definition->getName())
-                );
+                throw new ClassNotInstantiableException(sprintf("Class \"%s\" is not instantiable",
+                        $definition->getName()));
             }
         }
 
@@ -95,6 +93,16 @@ class ObjectResolver implements DefinitionResolverInterface
 
             return new $definitionName(...$methodArguments);
         };
+    }
+
+    public function hasContainer()
+    {
+        return $this->definitionResolver->hasContainer();
+    }
+
+    private function getContainer(): PsrServiceContainer
+    {
+        return $this->definitionResolver->container;
     }
 
     /**
@@ -117,16 +125,17 @@ class ObjectResolver implements DefinitionResolverInterface
             if ($dependency) {
                 $dependencyDefinition = $this->definitionResolver->getDefinition($dependency->getName());
 
-                $methodDependencies[] = ($dependencyDefinition instanceof ObjectDefinition)
-                    ? $this->resolve($dependencyDefinition)
-                    : $this->definitionResolver->resolve($dependencyDefinition);
+                if ($this->hasContainer() && $this->getContainer()->isShared($dependencyDefinition->getName())) {
+                    $methodDependencies[] = $this->getContainer()->get($dependencyDefinition->getName());
+                } else {
+                    $methodDependencies[] = ($dependencyDefinition instanceof ObjectDefinition) ? $this->resolve($dependencyDefinition) : $this->definitionResolver->resolve($dependencyDefinition);
+                }
             } else {
                 if ($parameter->isDefaultValueAvailable()) {
                     $methodDependencies[] = $parameter->getDefaultValue();
                 } else {
-                    throw new UnresolvableDependencyException(
-                        sprintf("Can't resolve dependency \"%s\"", $parameter->name)
-                    );
+                    throw new UnresolvableDependencyException(sprintf("Can't resolve dependency \"%s\"",
+                            $parameter->name));
                 }
             }
         }

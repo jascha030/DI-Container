@@ -31,6 +31,8 @@ class PsrServiceContainer implements ContainerInterface
      */
     protected $beingResolved = [];
 
+    public $shared = [];
+
     /**
      * @var DefinitionResolver
      */
@@ -43,7 +45,7 @@ class PsrServiceContainer implements ContainerInterface
      */
     public function __construct()
     {
-        $this->definitionResolver = new DefinitionResolver();
+        $this->definitionResolver = new DefinitionResolver($this);
     }
 
     /**
@@ -57,8 +59,12 @@ class PsrServiceContainer implements ContainerInterface
      * @throws Exception
      * @since 1.4.0
      */
-    public function set(string $name, $value = null)
+    public function set(string $name, $value = null, $shared = false)
     {
+        if ($shared && !$this->isShared($name)) {
+            $this->shared[] = $name;
+        }
+
         if ($this->isResolved($name) && ! $value) {
             return;
         }
@@ -109,6 +115,16 @@ class PsrServiceContainer implements ContainerInterface
     public function has($id)
     {
         return $this->isResolved($id);
+    }
+
+    /**
+     * @param $name
+     *
+     * @return bool
+     */
+    public function isShared(string $name)
+    {
+        return (in_array($name, $this->shared));
     }
 
     /**

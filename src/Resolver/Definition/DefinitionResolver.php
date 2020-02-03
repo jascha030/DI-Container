@@ -4,6 +4,7 @@ namespace Jascha030\DIC\Resolver\Definition;
 
 use Closure;
 use Exception;
+use Jascha030\DIC\Container\Psr\PsrServiceContainer;
 use Jascha030\DIC\Definition\DefinitionInterface;
 use Jascha030\DIC\Definition\ObjectDefinition;
 use Jascha030\DIC\Exception\Definition\DefinitionTypeNotFoundException;
@@ -24,6 +25,8 @@ class DefinitionResolver implements DefinitionResolverInterface
      */
     protected $defined = [];
 
+    public $container;
+
     private $availableResolvers = [
         ObjectDefinition::class => ObjectResolver::class
     ];
@@ -31,12 +34,17 @@ class DefinitionResolver implements DefinitionResolverInterface
     /**
      * DefinitionResolver constructor.
      *
+     * @param PsrServiceContainer|null $container
      * @param array $definitions
      *
      * @throws DefinitionTypeNotFoundException
      */
-    public function __construct(array $definitions = [])
+    public function __construct(PsrServiceContainer $container = null, array $definitions = [])
     {
+        if ($container) {
+            $this->container = $container;
+        }
+
         foreach ($definitions as $definitionName => $definition) {
             if (! is_string($definitionName)) {
                 $definitionName = $definition;
@@ -145,5 +153,10 @@ class DefinitionResolver implements DefinitionResolverInterface
         $resolverType = $this->availableResolvers[$definitionType];
 
         return new $resolverType($this);
+    }
+
+    public function hasContainer()
+    {
+        return($this->container instanceof PsrServiceContainer);
     }
 }

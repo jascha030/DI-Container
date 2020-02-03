@@ -18,14 +18,14 @@ include "vendor/autoload.php";
  */
 class User
 {
-    public $name = "Jeff";
+    public $name;
 
     /**
      * User constructor.
      *
      * @param string $name
      */
-    public function __construct($name = "")
+    public function __construct($name = "Jeff")
     {
         if (! empty($name)) {
             $this->name = $name;
@@ -62,6 +62,10 @@ class UserService
 
 // Instantiate new Container
 $container = new PsrServiceContainer();
+
+$container->set(User::class, function () {
+    return new User("Gerrit");
+}, true);
 
 /**
  * Get resolvable class

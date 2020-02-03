@@ -21,4 +21,6 @@ interface DefinitionResolverInterface
      * @return mixed
      */
     public function resolve(DefinitionInterface $definition);
+
+    public function hasContainer();
 }
