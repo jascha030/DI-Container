@@ -31,6 +31,9 @@ class PsrServiceContainer implements ContainerInterface
      */
     protected $beingResolved = [];
 
+    /**
+     * @var array
+     */
     public $shared = [];
 
     /**

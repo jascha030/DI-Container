@@ -63,8 +63,16 @@ class UserService
 // Instantiate new Container
 $container = new PsrServiceContainer();
 
-$container->set(User::class, function () {
-    return new User("Gerrit");
+$user = User::class;
+
+$container->set($user, function () use ($user) {
+    static $_user;
+
+    if ($_user === null) {
+        $_user = new $user("Gerrit");
+    }
+
+    return $_user;
 }, true);
 
 /**
